@@ -14,3 +14,7 @@ class Market(commands.Cog):
         self.client = client
 
     # TODO Write market commands here
+
+
+def setup(client):
+    client.add_cog(Market(client))
