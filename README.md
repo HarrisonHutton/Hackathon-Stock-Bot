@@ -1,39 +1,61 @@
-# Picture This
+# UBHacking 2021
+
+## Smooth Stocks
 
 ## Table of Contents
-1. [Overview](#Overview)
-2. [Specifications](#Specifications)
-3. [User Stories](#User)
+1. [Description](#Description)
+1. [User Stories]()
+2. [Specifications]()
+3. [Wireframes]()
+4. [Schemas]()
 
-## Overview
 ### Description
-A net 64x64 RGB LED matrix is mounted on a wall at child-height. Each LED can be individually controlled by a user, who can light/dim a given LED using several different colors.
+Smooth Stocks is a Discord bot that lets users maintain a faux stock portfolio.
 
-## Specifications
+### User Stories
+#### Required
+* Investor can create a new trading portfolio
+    * Reason: Investor need a portfolio to maintain a balance and track which stocks they're invested in
 
-### 1. Inputs
-- Physical joystick input [x1]
-    - Used to select LED
-- Buttons [x9]
-    - 8 colors (WRGBYCOP), 1 reset button
-- Toggle Switch [x1]
-    - Individual module power
+* Investor can place an order to buy or sell American listed stocks
+    * Reason: Buying and selling stocks are standard trading activities for any investor's portfolio
 
-### 2. Outputs
+#### Optional
+* Investor can view a graph of a stocks price movement over time
+    * Reason: Stock information over time helps inform an investor's decision
 
+* Investor can share their portfolio with other investors
+    * Reason: Viewing other investor's profiles is often useful for gaining insights on profitable stocks
 
-### 3. Constraints
+* Investor can place limit buys, limit sells, stop loss, etc.
+    * Reason: These advanced tools are useful for experienced investors to execute orders based on market conditions
 
-**Required User Stories**
+### Specifications
+
+#### Inputs
+* `/command` Allows an investor to run a command with the Smooth Stocks bot
+    * Reason: `/command` Is a familiar way to enter commands for many Discord users
+
+#### Outputs
+* `/buyWithTicker [ticker] [quantity]`
+    * Whether or not the order is allowed to be placed
+        * Reason: Investors should not be able to place an order that has no chance of being executed. Reasons include not enough buying power or outside of trading hours
+    * Confirmation of order with portfolio buying power, total cost of order, and a prompt to place the order
+        * Reason: Investors should know how much buying power they have and how much their order will cost. This helps them decide if they'd really like to place the order.
+    * Affirmation of successful buy
+        * Reason: Investors need to know if the buy order was executed successfully
+    * Notice of unsuccessful buy with reason
+        * Reason: The investor should know that the buy order was not executed successfully and why, so that they can try to execute the same or another command if they desire
+
+* `/sellWithTicker [ticker] [quantity]`
+    * Affirmation of successful sell
 
 * 
 
-
-**Optional User Stories**
-
-* 
+#### Constraints
 
 
-## Schema 
+### Wireframes
 
-### Models
+
+### Schemas
