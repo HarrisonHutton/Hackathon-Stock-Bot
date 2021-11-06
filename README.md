@@ -36,13 +36,12 @@ Smooth Stocks is a Discord bot that lets users maintain a faux stock portfolio.
 
 #### Inputs
 * `/createPortfolio [name]` Allows an investor to create a portfolio called `[name]`
-    * Reason: This is how the investor starts investing with a new portfolio
 
-* `/buyWithTicker [ticker] [quantity]` Purchase `[quantity]` amount of `[ticker]`
-    * Reason: Buying stocks is one of the main components of maintaining a stock portfolio
+* `/buy [ticker] [quantity]` Purchase `[quantity]` amount of `[ticker]`
 
-* `/sellWithTicker [ticker] [quantity]` Sell `[quantity]` amount of `[ticker]`
-    * Reason: Selling stocks is one of the main components of maintaining a stock portfolio
+* `/sell [ticker] [quantity]` Sell `[quantity]` amount of `[ticker]`
+
+* `/viewPortfolio` Lists information about an investor's portfolio
 
 #### Outputs
 * `/createPortfolio [name]`
@@ -51,7 +50,7 @@ Smooth Stocks is a Discord bot that lets users maintain a faux stock portfolio.
     * "How to Use" information listing available commands
         * Reason: The investor only needs to know one command, and the bot will inform them of what else they can do
 
-* `/buyWithTicker [ticker] [quantity]`
+* `/buy [ticker] [quantity]`
     * Whether or not the order is allowed to be placed
         * Reason: Investors should not be able to place an order that has no chance of being executed. Reasons include not enough buying power or outside of trading hours
     * Confirmation of order with portfolio buying power, total cost of order, and a prompt to place the order
@@ -61,7 +60,7 @@ Smooth Stocks is a Discord bot that lets users maintain a faux stock portfolio.
     * Notice of unsuccessful buy with reason
         * Reason: The investor should know that the buy order was not executed successfully and why, so that they can try to execute the same or another command if they desire
 
-* `/sellWithTicker [ticker] [quantity]`
+* `/sell [ticker] [quantity]`
     * Whether or not the order is allowed to placed
         * The investor should not be allowed to place an order that will not execute. Reasons include trading outside of hours or trying to sell 0 or more than they own
     * Confirmation of order with the desired quantity, total value of the order, and a prompt to confirm the order
@@ -70,6 +69,11 @@ Smooth Stocks is a Discord bot that lets users maintain a faux stock portfolio.
         * Reason: The investor needs to be notified that the stocks were successfully sold and the amount of money they can expect to be added to their buying power as a result
     * Notice of unsuccessful sell with reason
         * Reason: The investor should be informed if their order wasn't able to be executed, along with the reason why
+
+* `/viewPortfolio` Allows an investor to view their portfolio
+    * For each stock in portfolio:
+        * `ticker | quantity | most recent price | value`
+    * Total portfolio value
 
 #### Constraints
 * Bot should be able to be added to any Discord server
