@@ -22,6 +22,9 @@ Smooth Stocks is a Discord bot that lets users maintain a faux stock portfolio.
 * Investor can view their portfolio
     * Reason: Investors need to be aware of the status of their portfolio in order to make decisions or simply view how their investors are faring
 
+* Investor can view available commands to the Smooth Stocks bot
+    * Reason: New investors need to know how to use the Smooth Stocks bot to manage their profile
+
 #### Optional
 * Investor can view a graph of a stocks price movement over time
     * Reason: Stock information over time helps inform an investor's decision
@@ -42,6 +45,8 @@ Smooth Stocks is a Discord bot that lets users maintain a faux stock portfolio.
 * `/sell [ticker] [quantity]` Sell `[quantity]` amount of `[ticker]`
 
 * `/viewPortfolio` Lists information about an investor's portfolio
+
+* `/smoothHelp` Lists available commands for this Discord bot
 
 #### Outputs
 * `/createPortfolio [name]`
@@ -75,12 +80,100 @@ Smooth Stocks is a Discord bot that lets users maintain a faux stock portfolio.
         * `ticker | quantity | most recent price | value`
     * Total portfolio value
 
+* `/smoothHelp` Lists commands available to this Discord bot
+    * `/smoothHelp` to ...
+    * `/buy [ticker] [quantity]` to ...
+
 #### Constraints
 * Bot should be able to be added to any Discord server
     * Reason: The bot should be accessible to as many users as possible
 
 
 ### Models
-#### Portfolio
+
+**Portfolio**
+An object of this class is contained within an Investor object and is used to manage that investor's portfolio
+
+#### Data
+* `_buyingPower`
+    * Float e.g. 1000.24
+* `_portfolioValue`
+    * Float e.g. 3425.53
+* `_ownedStocks`
+    * Dictionary e.g. {AAPL: 21, TSLA: 25, ...}
+
+#### Methods
+* `GetQuantity(tickerName)`
+    * Takes ticker name as a string
+    * Returns the quantity of tickerName in this portfolio, or 0 if the tickerName is not in `_ownedStocks`
+* `GetBuyingPower()`
+    * Returns the buying power of this portfolio
+* `GetPortfolioValue()`
+    * Returns the total value of this portfolio, calculated as `(_buyingPower) * (ticker * price)`
+* `Bought(ticker, quantity)`
+    * Takes a stock ticker as a string and a quantity purchased as an integer
+    * Returns None
+    * Updates this portfolio to reflect the purchase of `quantity` shares of `ticker`
+* `Sold(ticker, quantity)`
+    * Takes a stock ticker as a string and a quantity sold as an integer
+    * Return None
+    * Updates this portfolio to reflect the sale of `quantity` shares of `ticker`
+
+---
+
+**Market**
+This object is used to handle anything that needs to access market data or state.
+
+#### Data
+* `_recentlyPolled`
+    * A dictionary mapping tickers as strings to the most recent price. Updated when an Investor asks for the MostRecentPrice of a stock. Used to reduce API calls.
+
+#### Methods
+* MostRecentPrice(ticker)
+* IsTradingHours()
+
+---
+
+**Investor**
+This class represents a specific investor, and maintains their portfolio.
+
+#### Data
+* ID
+* Portfolio
+
+#### Methods
+* Encode()
+    * Return a JSON string encoding all of this investors information
+
+---
 
 ### Examples
+* /buy [ticker] [quantity]
+     - If Allowed
+SmoothStocks: You have [buyingPower] buying power. The order will cost [totalprice] dollars to buy. You are trying to buy [quantity] of [ticker]. Are you sure? y/n
+User: y
+SmoothStocks: Your order has gone through.
+-or
+User: n
+SmoothStocks: Your order has been canceled.
+    - If Not Allowed
+-outside of trading hours
+SmoothStocks: I'm sorry, but your order of [quantity][ticker] cannot be completed. You are trying to buy outside of trading hours. The trading hours are 9:30AM to 4:00PM
+-or not enough funds
+SmoothStocks: I'm sorry, but your order of [quantity][ticker] cannot be completed. You don't have enough funds.
+-or fake/no number
+SmoothStocks: I'm sorry, but you can't buy nothing.
+-or no portfolio
+SmoothStocks: I'm sorry, but you don't have a portfolio
+-or fake stock
+SmoothStocks: I'm sorry, but this stock doesn't exist
+* /sell [ticker] [quantity]
+    - If Allowed
+SmoothStocks: You want to sell [quantity][ticker].
+Before you confirm this transaction you have [OldQuantity][ticker]. After confirming this transaction you'll have [NewQuantity][ticker]. Are you sure? y/n
+-or
+SmoothStocks: Are you sure you want to sell all of your [ticker] stocks? y/n
+User: y
+SmoothStocks: Your transaction has been compleated
+-or
+User: n
