@@ -4,20 +4,23 @@
 
 ## Table of Contents
 1. [Description](#Description)
-2. [User Stories]()
-3. [Specifications]()
-4. [Schemas]()
+2. [UserStories](#UserStories)
+3. [Specifications](#Specifications)
+4. [Models](#Models)
 
 ### Description
 Smooth Stocks is a Discord bot that lets users maintain a faux stock portfolio.
 
-### User Stories
+### UserStories
 #### Required
 * Investor can create a new trading portfolio
     * Reason: Investor need a portfolio to maintain a balance and track which stocks they're invested in
 
 * Investor can place an order to buy or sell American listed stocks
     * Reason: Buying and selling stocks are standard trading activities for any investor's portfolio
+
+* Investor can view their portfolio
+    * Reason: Investors need to be aware of the status of their portfolio in order to make decisions or simply view how their investors are faring
 
 #### Optional
 * Investor can view a graph of a stocks price movement over time
