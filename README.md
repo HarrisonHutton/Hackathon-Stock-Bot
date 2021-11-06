@@ -90,7 +90,7 @@ Smooth Stocks is a Discord bot that lets users maintain a faux stock portfolio.
 
 
 ### Models
-
+---
 **Portfolio**
 An object of this class is contained within an Investor object and is used to manage that investor's portfolio
 
