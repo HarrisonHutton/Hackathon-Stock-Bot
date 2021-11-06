@@ -4,10 +4,9 @@
 
 ## Table of Contents
 1. [Description](#Description)
-1. [User Stories]()
-2. [Specifications](#Specifications)
-3. [Wireframes](#Wireframes)
-4. [Schemas](#Schemas)
+2. [User Stories]()
+3. [Specifications]()
+4. [Schemas]()
 
 ### Description
 Smooth Stocks is a Discord bot that lets users maintain a faux stock portfolio.
@@ -33,10 +32,16 @@ Smooth Stocks is a Discord bot that lets users maintain a faux stock portfolio.
 ### Specifications
 
 #### Inputs
-* `/command` Allows an investor to run a command with the Smooth Stocks bot
+* `/command [args]` Allows an investor to run a command with the Smooth Stocks bot
     * Reason: `/command` Is a familiar way to enter commands for many Discord users
 
 #### Outputs
+* `/createPortfolio [name]`
+    * A message saying that the portfolio was successfully created
+        * Reason: The investor should know that their porfolio was created
+    * "How to Use" information listing available commands
+        * Reason: The investor only needs to know one command, and the bot will inform them of what else they can do
+
 * `/buyWithTicker [ticker] [quantity]`
     * Whether or not the order is allowed to be placed
         * Reason: Investors should not be able to place an order that has no chance of being executed. Reasons include not enough buying power or outside of trading hours
@@ -48,14 +53,21 @@ Smooth Stocks is a Discord bot that lets users maintain a faux stock portfolio.
         * Reason: The investor should know that the buy order was not executed successfully and why, so that they can try to execute the same or another command if they desire
 
 * `/sellWithTicker [ticker] [quantity]`
-    * Affirmation of successful sell
-
-* 
+    * Whether or not the order is allowed to placed
+        * The investor should not be allowed to place an order that will not execute. Reasons include trading outside of hours or trading too frequently
+    * Confirmation of order with the desired quantity, total value of the order, and a prompt to confirm the order
+        * Reason: The investor should have an overview of the order before it's executed, so that they can see any mistakes they might have made
+    * Affirmation of successful sell with quantity sold and total price of sell order
+        * Reason: The investor needs to be notified that the stocks were successfully sold and the amount of money they can expect to be added to their buying power as a result
+    * Notice of unsuccessful sell with reason
+        * Reason: The investor should be informed if their order wasn't able to be executed, along with the reason why
 
 #### Constraints
+* Bot should be able to be added to any Discord server
+    * Reason: The bot should be accessible to as many users as possible
 
 
-### Wireframes
+### Models
+#### Portfolio
 
-
-### Schemas
+### Examples
