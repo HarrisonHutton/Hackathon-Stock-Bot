@@ -5,9 +5,9 @@
 ## Table of Contents
 1. [Description](#Description)
 1. [User Stories]()
-2. [Specifications]()
-3. [Wireframes]()
-4. [Schemas]()
+2. [Specifications](#Specifications)
+3. [Wireframes](#Wireframes)
+4. [Schemas](#Schemas)
 
 ### Description
 Smooth Stocks is a Discord bot that lets users maintain a faux stock portfolio.
