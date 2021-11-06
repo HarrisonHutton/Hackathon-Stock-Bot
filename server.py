@@ -1,6 +1,6 @@
 """
 
-This file creates the discord bot
+This file creates the discord bot. This doesn't need to be modified anymore.
 
 """
 
