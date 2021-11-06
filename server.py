@@ -25,6 +25,37 @@ async def on_ready():
 
 
 """
+Commands:
+"""
+
+@client.command()
+async def load(ctx, extension):
+  if str(ctx.author.id) in ['287790861939376128', '214184731158249473', '551134962259329034', '252185844956266497']:
+    client.load_extension(f'cogs.{extension}')
+    await ctx.send(f'```Commands in {extension}.py have been loaded.```')
+  else:
+    await ctx.send(f'```You do not have permission to edit commands.```')
+
+
+@client.command()
+async def unload(ctx, extension):
+  if str(ctx.author.id) in ['287790861939376128', '214184731158249473', '551134962259329034', '252185844956266497']:
+    client.unload_extension(f'cogs.{extension}')
+    await ctx.send(f'```Commands in {extension}.py have been unloaded.```')
+  else:
+    await ctx.send(f'```You do not have permission to edit commands.```')
+
+
+@client.command()
+async def reload(ctx, extension):
+  if str(ctx.author.id) in ['287790861939376128', '214184731158249473', '551134962259329034', '252185844956266497']:
+    client.reload_extension(f'cogs.{extension}')
+    await ctx.send(f'```Commands in {extension}.py have been reloaded.```')
+  else:
+    await ctx.send(f'```You do not have permission to edit commands.```')
+
+
+"""
 Load all cogs:
 """
 
