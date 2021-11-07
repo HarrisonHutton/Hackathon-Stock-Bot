@@ -6,6 +6,7 @@ This file will store all data in Investor
 
 import discord
 import json
+import datetime
 
 from discord.ext import commands
 
@@ -28,10 +29,28 @@ class Investor(commands.Cog):
     # Get time
     @commands.command()
     async def buy(self, ctx, ticker, quantity):
+
+        if ticker == None or quantity == None:
+            await ctx.send(f"\
+                The buy command takes both a ticker symbol \
+                and a quantity. Please try again.\
+            ")
+
+        d = datetime.weekday()
+        h = datetime.time().hour
+        m = datetime.time().minute
+
+        allowed_day = (d <= 4)
+        allowed_hour = (h >= 9 and h < 4)
+        allowed_minute = True
+        if h == 9 and m < 30:
+            allowed_minute = False
+        
+
         market_value = ... # TODO Get stock price
         required_funds = market_value * quantity
         portfolio_exists = ... # TODO check if exists
-        in_market_hours = ... # TODO get time
+        in_market_hours = allowed_day and allowed_hour and allowed_minute
         stock_exists = ... # TODO check if stock exists
         cost = ... # TODO get total cost
         buying_power = self.portfolio.GetBuyingPower()
