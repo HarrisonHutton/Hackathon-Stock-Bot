@@ -4,42 +4,39 @@ This file holds the definition of the Portfolio class
 
 import discord
 import json
+import market
 
 from discord.ext import commands
 
 
-class Portfolio(commands.Cog):
+class Portfolio:
 
-    def __init__(self, client):
-        self.client = client
-        self.buying_power = ...
-        self.portfolio_value = ...
-        self.owned_stocks = ...
+    def __init__(self, bp=100000.0, pv=100000.0, owned=None):
+        if owned is None:
+            owned = {}
+        self.buying_power = bp
+        self.portfolio_value = pv
+        self.owned_stocks = owned
+        self.market = market.Market  # TODO Global market
 
     # Finished function
-    async def GetQuantity(self, ticker_name):
+    def get_quantity(self, ticker_name):
         return self.owned_stocks.get(ticker_name, 0)
 
     # Finished function
-    async def GetBuyingPower(self):
+    def get_buying_power(self):
         return self.buying_power
-    
-    # TODO for this function:
-    # Replace market_value with the actual market value, probably
-    # from an API call
-    async def GetPortfolioValue(self):
+
+    def get_portfolio_value(self):
         value = 0
         for ticker in self.owned_stocks:
             quantity = self.owned_stocks[ticker]
-            market_value = ... # call to API
+            market_value = 5.05  # TODO Get market value
             value += (quantity * market_value)
         return value + self.buying_power
 
-    # TODO Bot output
-    # Error-checking handled in Investor class
-    @commands.command()
-    async def Bought(self, ctx, ticker, quantity):
-        market_value = ... # call to API
+    def bought(self, ticker, quantity):
+        market_value = 5.05  # TODO Get market value
         total_cost = quantity * market_value
 
         # Buy using buying power then increment amount owned
@@ -51,17 +48,13 @@ class Portfolio(commands.Cog):
 
         return
 
-    # TODO Bot output
-    # Error-checking handled in Investor class
-    @commands.command()
-    async def Sold(self, ctx, ticker, quantity):
-        market_value = ... # call to API
+    def sold(self, ticker, quantity):
+        market_value = 5.05  # TODO Get market value
         sold_for = quantity * market_value
         self.buying_power += sold_for
         self.owned_stocks[ticker] -= quantity
 
-    # Finished. Returns encoded portfolio data
-    def Encode(self):
+    def encode(self):
         encoded = {
             "buying_power": self.buying_power,
             "portfolio_value": self.portfolio_value,
@@ -82,6 +75,3 @@ class Portfolio(commands.Cog):
 #       }
 #   }
 # }
-
-def setup(client):
-    client.add_cog(Portfolio(client))

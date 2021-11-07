@@ -9,17 +9,10 @@ import discord
 from discord.ext import commands
 
 
-class Market(commands.Cog):
+class Market:
 
-    def __init__(self, client):
-        self.client = client
+    def __init__(self):
+        return
 
-    # TODO Write market commands here
-
-    @commands.command()
-    async def test(self, ctx, arg1=None, arg2=None):
+    def test(self, ctx, arg1=None, arg2=None):
         await ctx.send(f"TEST {arg1} {arg2}")
-
-
-def setup(client):
-    client.add_cog(Market(client))
