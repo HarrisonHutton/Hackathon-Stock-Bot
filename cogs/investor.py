@@ -9,6 +9,7 @@ import json
 
 from discord.ext import commands
 
+
 class Investor(commands.Cog):
 
     def __init__(self, client):
@@ -28,9 +29,9 @@ class Investor(commands.Cog):
     # Get time
     @commands.command()
     async def buy(self, ctx, ticker, quantity):
-        market_value = ... # TODO Get stock price
+        market_value = 5.00 # TODO Get stock price
         required_funds = market_value * quantity
-        portfolio_exists = ... # TODO check if exists
+        portfolio_exists =  # TODO check if exists
         in_market_hours = ... # TODO get time
         stock_exists = ... # TODO check if stock exists
         cost = ... # TODO get total cost

@@ -7,6 +7,7 @@ import json
 
 from discord.ext import commands
 
+
 class Portfolio(commands.Cog):
 
     def __init__(self, client):

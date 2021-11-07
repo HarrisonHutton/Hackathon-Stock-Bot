@@ -18,6 +18,7 @@ client = commands.Bot(command_prefix='/')
 Event listeners:
 """
 
+
 @client.event
 async def on_ready():
   print(f'{client.user} has connected to Discord!')
@@ -29,8 +30,8 @@ Load all cogs:
 """
 
 for filename in os.listdir('./cogs'):
-  if filename.endswith('.py'):
-    client.load_extension(f'cogs.{filename[:-3]}')
+    if filename.endswith('.py'):
+        client.load_extension(f'cogs.{filename[:-3]}')
 
 # This starts the bot
 client.run(token)
