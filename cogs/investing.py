@@ -187,13 +187,25 @@ class Investor(commands.Cog):
 				I'm sorry, but your portfolio couldn't be found. Please make a portfolio before trading by executing the createPortfolio command.")
 			return
 
-		avail_to_sell = self.portfolio.get_quantity(ticker)
+		quantity = int(quantity)
+		quantity_owned = self.portfolio.get_quantity(ticker)
 		in_market_hours = is_market_hours()
 
 		if quantity == 0:
 			await ctx.send(f"\
 				I'm sorry, but you can't sell 0 shares of a stock.\
 			")
+
+		elif quantity_owned < quantity:
+			if quantity_owned == 0:
+				await ctx.send(f"\
+					I'm sorry, but you don't own any shares of {ticker}.\
+				")
+			else:
+				await ctx.send(f"\
+					I'm sorry, but your order to sell {quantity} shares of {ticker} couldn't be completed. Your portfolio only contains {avail_to_sell} shares of {ticker}.\
+				")
+			return
 
 		elif not in_market_hours:
 			# await ctx.send(f"\
@@ -203,16 +215,10 @@ class Investor(commands.Cog):
 				Available market hours are M-F 9:30AM - 4:00PM EST. For UBHacking, this restriction has been temporarily lifted.\
 			")
 			avg_price = random.randint(1, 1250)
-			total = int(quantity) * avg_price
+			total = quantity * avg_price
 			self.portfolio.sold(ticker, quantity, avg_price)
 			await ctx.send(f"\
 				Your order to sell {quantity} shares of {ticker} was executed successfully, for an average price of ${avg_price}.00/share. The total sold value is ${total}.00\
-			")
-			return
-
-		elif avail_to_sell < quantity:
-			await ctx.send(f"\
-				I'm sorry, but your order to sell {quantity} shares of {ticker} couldn't be completed. Your portfolio only contains {avail_to_sell} shares of {ticker}.\
 			")
 			return
 
