@@ -1,9 +1,11 @@
+import os
+
 import discord
 import json
 import datetime
 import random
 from discord.ext import commands
-
+import requests
 
 def is_market_hours():
 	d = datetime.datetime.today().weekday()
@@ -22,8 +24,31 @@ def is_market_hours():
 class Market:
 
 	def __init__(self):
+		self.key = os.environ['API_KEY']
+		self.date = '2021-11-05'
+		self.update_market_date()
+
 		return
 
+	def ticker_price(self, ticker):
+		# Alpha Vantage is used for fetching stock price information: https://www.alphavantage.co/
+		self.update_market_date()
+		url = 'https://www.alphavantage.co/query?function=TIME_SERIES_DAILY_ADJUSTED&symbol=' + ticker + '&outputsize=compact&apikey=' + self.key
+		r = requests.get(url)
+		if 'Time Series (Daily)' not in r.json().keys():
+			return None
+		ticker_data = r.json()['Time Series (Daily)'][self.date]['4. close']
+		return float(ticker_data)
+
+	def update_market_date(self):
+		if datetime.datetime.today().weekday() <= 4:
+			self.date = str(datetime.datetime.today())[:10]
+		elif datetime.datetime.today().weekday() == 5:
+			self.date = str(datetime.datetime.today())[:10]
+			self.date = self.date[:9] + str(int(self.date[9]) - 1)
+		elif datetime.datetime.today().weekday() == 6:
+			self.date = str(datetime.datetime.today())[:10]
+			self.date = self.date[:9] + str(int(self.date[9]) - 2)
 
 class Portfolio:
 
