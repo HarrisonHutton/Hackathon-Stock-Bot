@@ -167,6 +167,17 @@ class Investor(commands.Cog):
 				The buy command takes both a ticker symbol and a quantity. Please try again.\
 			")
 			return
+
+		try:
+			int(quantity)
+		except ValueError:
+			await ctx.send("I'm sorry, but the quantity you entered is not valid.")
+			return
+
+		if not ticker.isalpha():
+			await ctx.send("I'm sorry, but the ticker you entered is not valid.")
+			return
+
 		elif not portfolio_exists:
 			await ctx.send(f"\
 				I'm sorry, but your portfolio couldn't be found. Please make a portfolio before trading by executing the createPortfolio command.\
@@ -311,6 +322,16 @@ class Investor(commands.Cog):
 			await ctx.send("Investing portfolio successfully created. Your available funds (buying power) are $100,000.00")
 		else:
 			await ctx.send("At this time, investors can only have one portfolio. To view your portfolio, type /view_portfolio.")
+
+	@commands.command()
+	async def smooth_help(self, ctx):
+		output = "Available commands for Smooth Stocks:\n\n"
+		output += "- `/create_portfolio`   To create a new investment portfolio\n\n"
+		output += "- `/view_portfolio`   To view your portfolio (if it exists)\n\n"
+		output += "- `/buy [ticker] [quantity]`   To buy *quantity* shares of *ticker*\n\n"
+		output += "- `/sell [ticker] [quantity]`   To sell *quantity* shares of *ticker*\n\n"
+		output += "- `/help`   To list available commands"
+		await ctx.send(output)
 
 
 def setup(client):
