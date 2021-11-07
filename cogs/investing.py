@@ -47,7 +47,7 @@ class Portfolio:
 		value = 0
 		for ticker in self.owned_stocks:
 			quantity = self.owned_stocks[ticker]
-			market_value = 5.05  # TODO Get market value
+			market_value = random.randint(1, 1250)  # TODO Get market value
 			value += (quantity * market_value)
 		return value + self.buying_power
 
