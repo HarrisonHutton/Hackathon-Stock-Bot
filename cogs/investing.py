@@ -6,6 +6,9 @@ import datetime
 import random
 from discord.ext import commands
 import requests
+import locale
+
+locale.setlocale(locale.LC_ALL, '')
 
 def is_market_hours():
 	d = datetime.datetime.today().weekday()
@@ -304,18 +307,19 @@ class Investor(commands.Cog):
 			await ctx.send("Please create a portfolio before trying to view it")
 			return
 
-		buying_power = self.portfolio.get_buying_power()
-		port_value = self.portfolio.get_portfolio_value()
+		bp_str = locale.currency(self.portfolio.get_buying_power(), grouping=True)
+		pv_str = locale.currency(self.portfolio.get_portfolio_value(), grouping=True)
+
 		stocks = self.portfolio.get_owned()
 
-		output = f"Buying power: {buying_power}\n"
-		output += f"Portfolio Value: {port_value}\n"
+		output = f"Buying power: {bp_str}\n"
+		output += f"Portfolio Value: {pv_str}\n"
 
 		if len(stocks) == 0:
 			output += "You do not own any stocks"
 		else:
 			for ticker in stocks:
-				output += f"{ticker}: {stocks[ticker]} shares"
+				output += f"{ticker} --- {stocks[ticker]} shares\n"
 
 		await ctx.send(output)
 		return
