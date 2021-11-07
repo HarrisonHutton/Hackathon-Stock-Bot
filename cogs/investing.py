@@ -1,6 +1,7 @@
 import discord
 import json
 import datetime
+import random
 from discord.ext import commands
 
 
@@ -29,7 +30,7 @@ class Portfolio:
 	def __init__(self, bp=100000.0, pv=100000.0, owned=None):
 		if owned is None:
 			owned = {}
-		self.buying_power = bp
+		self.buying_power = int(bp)
 		self.portfolio_value = pv
 		self.owned_stocks = owned
 		self.market = Market  # TODO Global market
@@ -50,8 +51,7 @@ class Portfolio:
 			value += (quantity * market_value)
 		return value + self.buying_power
 
-	def bought(self, ticker, quantity):
-		market_value = 5.05  # TODO Get market value
+	def bought(self, ticker, quantity, market_value):
 		total_cost = quantity * market_value
 
 		# Buy using buying power then increment amount owned
@@ -63,11 +63,10 @@ class Portfolio:
 
 		return
 
-	def sold(self, ticker, quantity):
-		market_value = 5.05  # TODO Get market value
-		sold_for = quantity * market_value
-		self.buying_power += sold_for
-		self.owned_stocks[ticker] -= quantity
+	def sold(self, ticker, quantity, market_value):
+		sold_for = int(quantity) * market_value
+		self.buying_power += int(sold_for)
+		self.owned_stocks[ticker] -= int(quantity)
 
 	def get_owned(self):
 		return self.owned_stocks
@@ -127,7 +126,7 @@ class Investor(commands.Cog):
 			return
 
 		in_market_hours = is_market_hours()
-		market_value = 5.05  # TODO Get with market API call
+		market_value = random.randint(1, 1250)  # TODO Get with market API call
 
 		stock_exists = True  # TODO check if stock exists
 		cost = market_value * int(quantity)
@@ -140,9 +139,17 @@ class Investor(commands.Cog):
 			return
 
 		elif not in_market_hours:
+			# await ctx.send(f"\
+			# 	I'm sorry, but your order to purchase {quantity} shares of {ticker} couldn't be completed. Available market hours are M-F 9:30AM until 4:00PM, EST.\
+			# ")
 			await ctx.send(f"\
-				I'm sorry, but your order to purchase {quantity} shares of {ticker} couldn't be completed. Available market hours are M-F 9:30AM until 4:00PM, EST.\
+				Available market hours are M-F 9:30AM - 4:00PM EST. For UBHacking, this restriction has been temporarily lifted.\
 			")
+			self.portfolio.bought(ticker, int(quantity), market_value)
+			await ctx.send(f"\
+				Your order to purchase {quantity} shares of {ticker} executed successfully at an average price of {market_value}, for a total cost of {cost}. You now own {self.portfolio.get_quantity(ticker)} shares.\
+			")
+			await self.view_portfolio(ctx)
 			return
 
 		elif not stock_exists:
@@ -188,8 +195,17 @@ class Investor(commands.Cog):
 			")
 
 		elif not in_market_hours:
+			# await ctx.send(f"\
+			# 	I'm sorry, but your order to sell {quantity} shares of {ticker} couldn't be completed. Available market hours are M-F 9:30AM until 4:00PM, EST.\
+			# ")
 			await ctx.send(f"\
-				I'm sorry, but your order to sell {quantity} shares of {ticker} couldn't be completed. Available market hours are M-F 9:30AM until 4:00PM, EST.\
+				Available market hours are M-F 9:30AM - 4:00PM EST. For UBHacking, this restriction has been temporarily lifted.\
+			")
+			avg_price = random.randint(1, 1250)
+			total = int(quantity) * avg_price
+			self.portfolio.sold(ticker, quantity, avg_price)
+			await ctx.send(f"\
+				Your order to sell {quantity} shares of {ticker} was executed successfully, for an average price of ${avg_price}.00/share. The total sold value is ${total}.00\
 			")
 			return
 
@@ -200,7 +216,7 @@ class Investor(commands.Cog):
 			return
 
 		else:  # TODO Ask for confirmation
-			avg_price = ...  # TODO avg sale price
+			avg_price = random.randint(1, 1250)  # TODO avg sale price
 			self.portfolio.sold(ticker, quantity)
 			await ctx.send(f"\
 				Your order to sell {quantity} shares of {ticker} was executed successfully, for an average price of {avg_price}.\
