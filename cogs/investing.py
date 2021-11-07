@@ -35,8 +35,10 @@ class Market:
 		self.update_market_date()
 		url = 'https://www.alphavantage.co/query?function=TIME_SERIES_DAILY_ADJUSTED&symbol=' + ticker + '&outputsize=compact&apikey=' + self.key
 		r = requests.get(url)
-		if 'Time Series (Daily)' not in r.json().keys():
-			return None
+		if 'Note' in r.json().keys():
+			return "Please wait."
+		if 'Error Message' in r.json().keys():
+			return "Invalid ticker."
 		ticker_data = r.json()['Time Series (Daily)'][self.date]['4. close']
 		return float(ticker_data)
 
