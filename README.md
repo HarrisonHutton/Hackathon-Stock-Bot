@@ -38,7 +38,7 @@ Smooth Stocks is a Discord bot that lets users maintain a faux stock portfolio.
 ### Specifications
 
 #### Inputs
-* `/createPortfolio [name]` Allows an investor to create a portfolio called `[name]`
+* `/createPortfolio` Allows an investor to create a portfolio
 
 * `/buy [ticker] [quantity]` Purchase `[quantity]` amount of `[ticker]`
 
