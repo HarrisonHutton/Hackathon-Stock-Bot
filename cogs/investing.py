@@ -112,16 +112,16 @@ class Investor(commands.Cog):
 
 	@commands.Cog.listener()
 	async def on_reaction_add(self, reaction, user):
-	    message = reaction.message
-	    if str(reaction) not in ['✅', '❌']:
-	        return False
-	    if not user.bot:
-	        if self.currently_investing.get(str(message), '') == str(user.id) and str(reaction) == '✅':
-	            await message.channel.send(f'{user.name} has confirmed their purchase.')
-	        elif self.currently_investing.get(str(message), '') == str(user.id) and str(reaction) == '❌':
-	            await message,channel.send(f'{user.name} has canceled their purchase.')
-	        else:
-	            return False
+		message = reaction.message
+		if str(reaction) not in ['✅', '❌']:
+			return False
+		if not user.bot:
+			if self.currently_investing.get(str(message), '') == str(user.id) and str(reaction) == '✅':
+				await message.channel.send(f'{user.name} has confirmed their purchase.')
+			elif self.currently_investing.get(str(message), '') == str(user.id) and str(reaction) == '❌':
+				await message.channel.send(f'{user.name} has canceled their purchase.')
+			else:
+				return False
 
 
 	# TODO for this command:
