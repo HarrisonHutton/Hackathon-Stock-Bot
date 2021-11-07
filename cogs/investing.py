@@ -100,6 +100,7 @@ class Investor(commands.Cog):
 		self.client = bot
 		self.id = bot.user
 		self.portfolio = None
+		self.currently_investing = {}
 
 	# TODO: Store encoded data [instead of?] returning
 	def serialize(self):
@@ -107,6 +108,21 @@ class Investor(commands.Cog):
 		#temp_dict = {self.id: portfolio_json}
 		#return json.dumps(temp_dict)
 		return json.dumps({})
+
+
+	@commands.Cog.listener()
+	async def on_reaction_add(self, reaction, user):
+	    message = reaction.message
+	    if str(reaction) not in ['✅', '❌']:
+	        return False
+	    if not user.bot:
+	        if self.currently_investing.get(str(message), '') == str(user.id) and str(reaction) == '✅':
+	            await message.channel.send(f'{user.name} has confirmed their purchase.')
+	        elif self.currently_investing.get(str(message), '') == str(user.id) and str(reaction) == '❌':
+	            await message,channel.send(f'{user.name} has canceled their purchase.')
+	        else:
+	            return False
+
 
 	# TODO for this command:
 	# Implement market API call
@@ -150,6 +166,11 @@ class Investor(commands.Cog):
 			await ctx.send(f"\
 				Your order to purchase {quantity} shares of {ticker} executed successfully at an average price of {market_value}, for a total cost of {cost}. You now own {self.portfolio.get_quantity(ticker)} shares.\
 			")
+			message = ctx.channel.last_message
+			self.currently_investing[str(message)] = str(ctx.author.id)
+			print('❌, ✅')
+			await message.add_reaction('✅')
+			await message.add_reaction('❌')
 			await self.view_portfolio(ctx)
 			return
 
@@ -170,7 +191,8 @@ class Investor(commands.Cog):
 			await ctx.send(f"\
 				Your order to purchase {quantity} shares of {ticker} executed successfully. You now own {self.portfolio.get_quantity(ticker)} shares.\
 			")
-			return
+			await message.add_reaction('✅')
+			await message.add_reaction('❌')
 
 	@commands.command()
 	async def sell(self, ctx, ticker=None, quantity=None):
