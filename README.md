@@ -90,7 +90,7 @@ Smooth Stocks is a Discord bot that lets users maintain a faux stock portfolio.
 
 
 ### Models
----
+
 **Portfolio**
 An object of this class is contained within an Investor object and is used to manage that investor's portfolio
 
@@ -119,6 +119,10 @@ An object of this class is contained within an Investor object and is used to ma
     * Return None
     * Updates this portfolio to reflect the sale of `quantity` shares of `ticker`
 
+* `Encode()`
+    * Encodes the buying power, stocks, quantity owned, and portfolio value as a JSON dictionary
+    * Returns this JSON dictionary
+
 ---
 
 **Market**
@@ -139,7 +143,9 @@ This class represents a specific investor, and maintains their portfolio.
 
 #### Data
 * ID
+    * Integer
 * Portfolio
+    * Object of type Portfolio
 
 #### Methods
 * Encode()
@@ -148,7 +154,7 @@ This class represents a specific investor, and maintains their portfolio.
 ---
 
 ### Examples
-* /buy [ticker] [quantity]
+* /buy[ticker] [quantity]
      - If Allowed
 SmoothStocks: You have [buyingPower] buying power. The order will cost [totalprice] dollars to buy. You are trying to buy [quantity] of [ticker]. Are you sure? y/n
 User: y
@@ -161,7 +167,7 @@ SmoothStocks: Your order has been canceled.
 SmoothStocks: I'm sorry, but your order of [quantity][ticker] cannot be completed. You are trying to buy outside of trading hours. The trading hours are 9:30AM to 4:00PM
 -or not enough funds
 SmoothStocks: I'm sorry, but your order of [quantity][ticker] cannot be completed. You don't have enough funds.
--or fake/no number
+-or selling zero/none stock/not a real number
 SmoothStocks: I'm sorry, but you can't buy nothing.
 -or no portfolio
 SmoothStocks: I'm sorry, but you don't have a portfolio
@@ -171,9 +177,44 @@ SmoothStocks: I'm sorry, but this stock doesn't exist
     - If Allowed
 SmoothStocks: You want to sell [quantity][ticker].
 Before you confirm this transaction you have [OldQuantity][ticker]. After confirming this transaction you'll have [NewQuantity][ticker]. Are you sure? y/n
--or
+-or selling all
 SmoothStocks: Are you sure you want to sell all of your [ticker] stocks? y/n
 User: y
 SmoothStocks: Your transaction has been compleated
 -or
 User: n
+SmoothStocks: Your transaction has been canceled 
+    - If Not Allowed
+-selling zero/none stock/not a real number
+smothStocks: I'm sorry, but you can't buy nothing.
+-or portfolio dosn't exist
+SmoothStocks:I'm sorry, but you don't have a portfolio. Please create one with /createPortfolio
+-or outside trading hours
+SmoothStocks: I’m sorry, but your transaction of [quantity][ticker] cannot be completed. You are trying to sell outside of trading hours. The trading hours are 9:30AM to 4:00PM
+-or don't have enough
+SmoothStocks: I'm sorry, but you don't have enough [ticker]stocks to sell.
+-or don't have enough (varient)
+SmoothStocks: I'm sorry, but you don't have any [ticker]stocks to sell.
+* /viewPortfolio
+    - If allowed
+SmoothStocks: Here is your portfolio.[Portfolio]
+    - If not allowed
+-Not a portfolio
+SmoothStocks: I'm Sorry, but you don't own a portfolio. Please use the command /makePortfolio
+* /createPortfolio
+    - If allowed
+SmoothStocks:Here is your new portfolio.[Portfolio](take to /help)
+    - If not allowed
+SmoothStocks:I'm sorry, but you already own a portfolio. Do you want to replace it with a new one? y/n
+user:y
+SmoothStocks:Here is your new portfolio.[Portfolio](take to /help)
+-or
+user:n
+SmoothStocks:Ok here is your old portfolio.[Portfolio]
+* /help
+SmoothStocks:Here are all the commands you can use.
+/createPortfolio #Creates Portfolio to use
+/viewPortfolio #Shows your portfolio
+/buy |ticker|amount| #Allows you to buy and add stocks to your portfolio
+/sell |ticker|amount| #Allows you to sell your stock from your portfolio
+/help #Shows you the commands(You are using this right now)
