@@ -2,6 +2,7 @@ import discord
 import json
 import datetime
 import random
+import os
 from discord.ext import commands
 
 
@@ -100,6 +101,7 @@ class Investor(commands.Cog):
 		self.client = bot
 		self.id = bot.user
 		self.portfolio = None
+
 
 	# TODO: Store encoded data [instead of?] returning
 	def serialize(self):
@@ -256,6 +258,9 @@ class Investor(commands.Cog):
 	@commands.command()
 	async def create_portfolio(self, ctx):
 		if self.portfolio is None:
+			fn = "../" + str(ctx.author.User.id) + ".json"
+			j = json.loads(fn)
+			await ctx.send(f"JSON from file: {j}")
 			self.portfolio = Portfolio()
 			await ctx.send("Investing portfolio successfully created. Your available funds (buying power) are $100,000.00")
 		else:
