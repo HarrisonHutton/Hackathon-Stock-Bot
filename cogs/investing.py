@@ -31,6 +31,7 @@ class Market:
 		return
 
 	def ticker_price(self, ticker):
+		# Alpha Vantage is used for fetching stock price information: https://www.alphavantage.co/
 		self.update_market_date()
 		url = 'https://www.alphavantage.co/query?function=TIME_SERIES_DAILY_ADJUSTED&symbol=' + ticker + '&outputsize=compact&apikey=' + self.key
 		r = requests.get(url)
