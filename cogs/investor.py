@@ -12,6 +12,20 @@ import portfolio
 from discord.ext import commands
 
 
+def is_market_hours():
+    d = datetime.datetime.today().weekday()
+    h = datetime.time().hour
+    m = datetime.time().minute
+
+    allowed_day = (d <= 4)
+    allowed_hour = (9 <= h < 4)
+    allowed_minute = True
+    if h == 9 and m < 30:
+        allowed_minute = False
+
+    return allowed_day and allowed_hour and allowed_minute
+
+
 class Investor(commands.Cog):
 
     def __init__(self, client):
@@ -20,23 +34,10 @@ class Investor(commands.Cog):
         self.portfolio = None
 
     # TODO: Store encoded data [instead of?] returning
-    def Encode(self):
-        portfolio_json = self.portfolio.Encode()
+    def encode(self):
+        portfolio_json = self.portfolio.encode()
         temp_dict = {self.id: portfolio_json}
         return json.dumps(temp_dict)
-
-    def IsMarketHours(self):
-        d = datetime.datetime.today().weekday()
-        h = datetime.time().hour
-        m = datetime.time().minute
-
-        allowed_day = (d <= 4)
-        allowed_hour = (9 <= h < 4)
-        allowed_minute = True
-        if h == 9 and m < 30:
-            allowed_minute = False
-
-        return allowed_day and allowed_hour and allowed_minute
 
     # TODO for this command:
     # Implement market API call
@@ -49,7 +50,7 @@ class Investor(commands.Cog):
                 and a quantity. Please try again.\
             ")
 
-        in_market_hours = self.IsMarketHours()
+        in_market_hours = is_market_hours()
 
         market_value = 5.05                         # TODO Get with market API call
         portfolio_exists = (self.portfolio is not None)
@@ -108,7 +109,7 @@ class Investor(commands.Cog):
     @commands.command()
     async def sell(self, ctx, ticker=None, quantity=None):
         avail_to_sell = self.portfolio.GetQuantity(ticker)
-        in_market_hours = self.IsMarketHours()
+        in_market_hours = is_market_hours()
         portfolio_exists = (self.portfolio is not None)
 
         if ticker is None or quantity is None:
@@ -156,7 +157,7 @@ class Investor(commands.Cog):
             return
 
     @commands.command()
-    async def viewPortfolio(self, ctx):
+    async def view_portfolio(self, ctx):
         blob = self.portfolio.Encode()
         port_info = json.loads(blob)
         buying_power = port_info["buying_power"]
@@ -174,7 +175,7 @@ class Investor(commands.Cog):
 
     # TODO load an existing portfolio
     @commands.command()
-    async def createPortfolio(self, ctx):
+    async def create_portfolio(self, ctx):
         self.portfolio = portfolio.Portfolio(self.client)
 
 
