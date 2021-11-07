@@ -208,23 +208,6 @@ class Investor(commands.Cog):
 			")
 			return
 
-		elif not in_market_hours:
-			# await ctx.send(f"\
-			# 	I'm sorry, but your order to purchase {quantity} shares of {ticker} couldn't be completed. Available market hours are M-F 9:30AM until 4:00PM, EST.\
-			# ")
-			await ctx.send(f"\
-				Available market hours are M-F 9:30AM - 4:00PM EST. For UBHacking, this restriction has been temporarily lifted.\
-			")
-			self.portfolio.bought(ticker, quantity)
-			await ctx.send(f"\
-				Your order to purchase {quantity} shares of {ticker} executed successfully at an average price of {market_value}, for a total cost of {cost}. You now own {self.portfolio.get_quantity(ticker)} shares.\
-			")
-			self.currently_investing[str(message)] = str(ctx.author.id)
-			await message.add_reaction('✅')
-			await message.add_reaction('❌')
-			await self.view_portfolio(ctx)
-			return
-
 		elif not stock_exists:
 			await ctx.send(f"\
 				I'm sorry, but {ticker} couldn't be found.\
@@ -235,6 +218,25 @@ class Investor(commands.Cog):
 			await ctx.send(f"\
 				I'm sorry, but you don't have enough funds to purchase {quantity} shares of {ticker}, which would cost {cost}. Your available buying power is {buying_power}.\
 			")
+			return
+
+		elif not in_market_hours:
+			# await ctx.send(f"\
+			# 	I'm sorry, but your order to purchase {quantity} shares of {ticker} couldn't be completed. Available market hours are M-F 9:30AM until 4:00PM, EST.\
+			# ")
+			await ctx.send(f"\
+				Available market hours are M-F 9:30AM - 4:00PM EST. For UBHacking, this restriction has been temporarily lifted.\
+			")
+			self.portfolio.bought(ticker, quantity)
+			cost = locale.currency(cost, grouping=True)
+			market_value = locale.currency(market_value, grouping=True)
+			await ctx.send(f"\
+				Your order to purchase {quantity} shares of {ticker} executed successfully at an average price of {market_value}, for a total cost of {cost}. You now own {self.portfolio.get_quantity(ticker)} shares.\
+			")
+			self.currently_investing[str(message)] = str(ctx.author.id)
+			await message.add_reaction('✅')
+			await message.add_reaction('❌')
+			await self.view_portfolio(ctx)
 			return
 
 		else:  # TODO prompt for confirmation
@@ -275,7 +277,7 @@ class Investor(commands.Cog):
 				")
 			else:
 				await ctx.send(f"\
-					I'm sorry, but your order to sell {quantity} shares of {ticker} couldn't be completed. Your portfolio only contains {avail_to_sell} shares of {ticker}.\
+					I'm sorry, but your order to sell {quantity} shares of {ticker} couldn't be completed. Your portfolio only contains {quantity_owned} shares of {ticker}.\
 				")
 			return
 
@@ -287,17 +289,19 @@ class Investor(commands.Cog):
 				Available market hours are M-F 9:30AM - 4:00PM EST. For UBHacking, this restriction has been temporarily lifted.\
 			")
 			avg_price = self.portfolio.sold(ticker, quantity)
-			total = quantity * avg_price
+			avg_price_print = locale.currency(avg_price, grouping=True)
+			total = locale.currency((quantity * avg_price), grouping=True)
 			await ctx.send(f"\
-				Your order to sell {quantity} shares of {ticker} was executed successfully, for an average price of ${avg_price}.00/share. The total sold value is ${total}.00\
+				Your order to sell {quantity} shares of {ticker} was executed successfully, for an average price of {avg_price_print}/share. The total sold value is {total}\
 			")
 			return
 
 		else:  # TODO Ask for confirmation
 			avg_price = self.portfolio.sold(ticker, quantity)
-			total = avg_price * quantity
+			total = locale.currency(avg_price * quantity, grouping=True)
+			avg_price_print = locale.currency(avg_price, grouping=True)
 			await ctx.send(f"\
-				Your order to sell {quantity} shares of {ticker} was executed successfully, for an average price of {avg_price}.00/share. The total sold value is ${total}.00\
+				Your order to sell {quantity} shares of {ticker} was executed successfully, for an average price of {avg_price_print}.00/share. The total sold value is ${total}.00\
 			")
 			return
 
