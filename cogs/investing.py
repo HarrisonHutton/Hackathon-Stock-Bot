@@ -21,6 +21,23 @@ def is_market_hours():
 	return allowed_day and allowed_hour and allowed_minute
 
 
+def valid_order(ticker, quantity, ctx, action):
+	if ticker is None or quantity is None:
+		return f"\
+			The {action} command takes both a ticker symbol and a quantity. Please try again.\
+		"
+
+	try:
+		int(quantity)
+	except ValueError:
+		return "I'm sorry, but the quantity you entered is not valid."
+
+	if not ticker.isalpha():
+		return "I'm sorry, but the ticker you entered is not valid."
+
+	return ""
+
+
 class Market:
 
 	def __init__(self):
@@ -72,12 +89,12 @@ class Portfolio:
 		value = 0
 		for ticker in self.owned_stocks:
 			quantity = self.owned_stocks[ticker]
-			market_value = self.market.ticker_price(ticker)
+			market_value = random.randint(1, 1250)
 			value += (quantity * market_value)
 		return value + self.buying_power
 
 	def bought(self, ticker, quantity):
-		market_value = self.market.ticker_price(ticker)
+		market_value = random.randint(1, 1250)
 		total_cost = quantity * market_value
 
 		# Buy using buying power then increment amount owned
@@ -90,7 +107,7 @@ class Portfolio:
 		return
 
 	def sold(self, ticker, quantity):
-		market_value = self.market.ticker_price(ticker)
+		market_value = random.randint(1, 1250)
 		sold_for = quantity * market_value
 		self.buying_power += sold_for
 		self.owned_stocks[ticker] -= quantity
@@ -100,7 +117,7 @@ class Portfolio:
 		return self.owned_stocks
 
 	def total_cost(self, ticker, quantity):
-		market_value = self.market.ticker_price(ticker)
+		market_value = random.randint(1, 1250)
 		return market_value * quantity
 
 	def serialize(self):
@@ -162,20 +179,9 @@ class Investor(commands.Cog):
 	async def buy(self, ctx, ticker=None, quantity=None):
 		portfolio_exists = (self.portfolio is not None)
 
-		if ticker is None or quantity is None:
-			await ctx.send(f"\
-				The buy command takes both a ticker symbol and a quantity. Please try again.\
-			")
-			return
-
-		try:
-			int(quantity)
-		except ValueError:
-			await ctx.send("I'm sorry, but the quantity you entered is not valid.")
-			return
-
-		if not ticker.isalpha():
-			await ctx.send("I'm sorry, but the ticker you entered is not valid.")
+		valid = valid_order(ticker, quantity, ctx, "buy")
+		if not valid == "":
+			await ctx.send(valid)
 			return
 
 		elif not portfolio_exists:
@@ -191,6 +197,7 @@ class Investor(commands.Cog):
 		cost = self.portfolio.total_cost(ticker, quantity)
 		buying_power = self.portfolio.get_buying_power()
 		message = ctx.channel.last_message
+		market_value = random.randint(1, 1250)
 
 		if quantity == 0:
 			await ctx.send(f"\
@@ -239,10 +246,9 @@ class Investor(commands.Cog):
 	async def sell(self, ctx, ticker=None, quantity=None):
 		portfolio_exists = (self.portfolio is not None)
 
-		if ticker is None or quantity is None:
-			await ctx.send(f"\
-				The buy command takes both a ticker symbol and a quantity. Please try again.\
-			")
+		valid = valid_order(ticker, quantity, ctx, "sell")
+		if not valid == "":
+			await ctx.send(valid)
 			return
 
 		elif not portfolio_exists:
@@ -277,7 +283,7 @@ class Investor(commands.Cog):
 			await ctx.send(f"\
 				Available market hours are M-F 9:30AM - 4:00PM EST. For UBHacking, this restriction has been temporarily lifted.\
 			")
-			avg_price = self.portfolio.sold(ticker, quantity, avg_price)
+			avg_price = self.portfolio.sold(ticker, quantity)
 			total = quantity * avg_price
 			await ctx.send(f"\
 				Your order to sell {quantity} shares of {ticker} was executed successfully, for an average price of ${avg_price}.00/share. The total sold value is ${total}.00\
