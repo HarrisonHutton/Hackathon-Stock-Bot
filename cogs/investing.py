@@ -168,7 +168,6 @@ class Investor(commands.Cog):
 			")
 			message = ctx.channel.last_message
 			self.currently_investing[str(message)] = str(ctx.author.id)
-			print('❌, ✅')
 			await message.add_reaction('✅')
 			await message.add_reaction('❌')
 			await self.view_portfolio(ctx)
