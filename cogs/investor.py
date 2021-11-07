@@ -7,6 +7,7 @@ This file will store all data in Investor
 import discord
 import json
 import datetime
+import portfolio
 
 from discord.ext import commands
 
@@ -15,46 +16,47 @@ class Investor(commands.Cog):
 
     def __init__(self, client):
         self.client = client
-        self.id = ... # TODO 
-        self.portfolio = ... #TODO
-
+        self.id = client.author.User.id
+        self.portfolio = None
 
     # TODO: Store encoded data [instead of?] returning
     def Encode(self):
-      portfolio_json=self.portfolio.Encode()
-      temp_dict={self.id:portfolio_json}
-      return json.dumps(temp_dict)
+        portfolio_json = self.portfolio.Encode()
+        temp_dict = {self.id: portfolio_json}
+        return json.dumps(temp_dict)
+
+    def IsMarketHours(self):
+        d = datetime.datetime.today().weekday()
+        h = datetime.time().hour
+        m = datetime.time().minute
+
+        allowed_day = (d <= 4)
+        allowed_hour = (9 <= h < 4)
+        allowed_minute = True
+        if h == 9 and m < 30:
+            allowed_minute = False
+
+        return allowed_day and allowed_hour and allowed_minute
 
     # TODO for this command:
     # Implement market API call
-    # Get time
     @commands.command()
-    async def buy(self, ctx, ticker, quantity):
+    async def buy(self, ctx, ticker=None, quantity=None):
 
-        if ticker == None or quantity == None:
+        if ticker is None or quantity is None:
             await ctx.send(f"\
                 The buy command takes both a ticker symbol \
                 and a quantity. Please try again.\
             ")
 
-        d = datetime.weekday()
-        h = datetime.time().hour
-        m = datetime.time().minute
+        in_market_hours = self.IsMarketHours()
 
-        allowed_day = (d <= 4)
-        allowed_hour = (h >= 9 and h < 4)
-        allowed_minute = True
-        if h == 9 and m < 30:
-            allowed_minute = False
+        market_value = 5.05                         # TODO Get with market API call
+        portfolio_exists = (self.portfolio is not None)
 
-        market_value = ... # TODO Get stock price
-        required_funds = market_value * quantity
-        portfolio_exists = ... # TODO check if exists
-        in_market_hours = allowed_day and allowed_hour and allowed_minute
-
-        stock_exists = ... # TODO check if stock exists
-        cost = ... # TODO get total cost
-        buying_power = self.portfolio.GetBuyingPower()
+        stock_exists = True                         # TODO check if stock exists
+        cost = market_value * int(quantity)
+        buying_power = await self.portfolio.GetBuyingPower()
 
         if quantity == 0:
             await ctx.send(f"\
@@ -85,7 +87,7 @@ class Investor(commands.Cog):
             ")
             return
 
-        elif required_funds > buying_power:
+        elif cost > buying_power:
             await ctx.send(f"\
                 I'm sorry, but you don't have enough funds to \
                 purchase {quantity} shares of {ticker}, which would \
@@ -94,8 +96,8 @@ class Investor(commands.Cog):
             ")
             return
 
-        else: # TODO prompt for confirmation
-            self.portfolio.Bought(ticker, quantity)
+        else:  # TODO prompt for confirmation
+            await self.portfolio.Bought(ticker, quantity)
             await ctx.send(f"\
                 Your order to purchase {quantity} shares of \
                 {ticker} executed successfully. You now own \
@@ -103,13 +105,17 @@ class Investor(commands.Cog):
             ")
             return
 
-        return
-
     @commands.command()
-    async def sell(self, ctx, ticker, quantity):
+    async def sell(self, ctx, ticker=None, quantity=None):
         avail_to_sell = self.portfolio.GetQuantity(ticker)
-        in_market_hours = ... # TODO check if market hours
-        has_portfolio = ... # TODO check if has portfoliio
+        in_market_hours = self.IsMarketHours()
+        portfolio_exists = (self.portfolio is not None)
+
+        if ticker is None or quantity is None:
+            await ctx.send(f"\
+                The buy command takes both a ticker symbol \
+                and a quantity. Please try again.\
+            ")
 
         if quantity == 0:
             await ctx.send(f"\
@@ -117,38 +123,37 @@ class Investor(commands.Cog):
                 of a stock.\
             ")
 
-        elif not has_portfolio: # TODO check if exists
+        elif not portfolio_exists:
             await ctx.send(f"\
                 I'm sorry, but your portfolio couldn't be found. \
                 Please make a portfolio before trading by \
                 executing the createPortfolio command.")
             return
 
-        elif not in_market_hours: # TODO check if market hours
-           await ctx.send(f"\
+        elif not in_market_hours:
+            await ctx.send(f"\
                 I'm sorry, but your order to sell {quantity} shares\
                 of {ticker} couldn't be completed. Available market\
                 hours are M-F 9:30AM until 4:00PM, EST.\
-           ")
-           return
+            ")
+            return
 
         elif avail_to_sell < quantity:
             await ctx.send(f"\
-                I'm sorry, but your order to sell {quantity} shares of {ticker} couldn't be completed. Your portfolio only contains {avail_to_sell} shares of {ticker}.\
+                I'm sorry, but your order to sell {quantity} shares of {ticker} \
+                couldn't be completed. Your portfolio only contains {avail_to_sell} shares of {ticker}.\
             ")
             return
         
-        else: # TODO Ask for confirmation
+        else:  # TODO Ask for confirmation
             avg_price = ...  # TODO avg sale price
-            self.portfolio.Sold(ticker, quantity)
+            await self.portfolio.Sold(ticker, quantity)
             await ctx.send(f"\
                 Your order to sell {quantity} shares of \
                 {ticker} was executed successfully, for an \
                 average price of {avg_price}.\
             ")
             return
-
-        return
 
     @commands.command()
     async def viewPortfolio(self, ctx):
@@ -167,10 +172,10 @@ class Investor(commands.Cog):
         await ctx.send(output)
         return
 
-    # TODO create a portfolio
+    # TODO load an existing portfolio
     @commands.command()
     async def createPortfolio(self, ctx):
-        return
+        self.portfolio = portfolio.Portfolio(self.client)
 
 
 def setup(client):
