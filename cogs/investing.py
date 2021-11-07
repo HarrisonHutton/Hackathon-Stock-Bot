@@ -69,13 +69,17 @@ class Portfolio:
 		self.buying_power += sold_for
 		self.owned_stocks[ticker] -= quantity
 
-	def encode(self):
+	def get_owned(self):
+		return self.owned_stocks
+
+	def custom_encode(self):
 		encoded = {
 			"buying_power": self.buying_power,
 			"portfolio_value": self.portfolio_value,
 			"owned_stocks": self.owned_stocks
 		}
-		return json.dumps(encoded)
+		json_blob = json.dumps(encoded)
+		return json_blob
 
 
 # Stored in JSON file or database:
@@ -93,57 +97,51 @@ class Portfolio:
 
 class Investor(commands.Cog):
 
-	def __init__(self, client):
-		self.client = client
-		self.id = client.author.User.id
+	def __init__(self, bot):
+		self.client = bot
+		self.id = bot.user
 		self.portfolio = None
 
 	# TODO: Store encoded data [instead of?] returning
 	def encode(self):
-		portfolio_json = self.portfolio.encode()
-		temp_dict = {self.id: portfolio_json}
-		return json.dumps(temp_dict)
+		#portfolio_json = self.portfolio.encode()
+		#temp_dict = {self.id: portfolio_json}
+		#return json.dumps(temp_dict)
+		return json.dumps({})
 
 	# TODO for this command:
 	# Implement market API call
 	@commands.command()
 	async def buy(self, ctx, ticker=None, quantity=None):
+		portfolio_exists = (self.portfolio is not None)
 
 		if ticker is None or quantity is None:
 			await ctx.send(f"\
-				The buy command takes both a ticker symbol \
-				and a quantity. Please try again.\
+				The buy command takes both a ticker symbol and a quantity. Please try again.\
 			")
-
-		in_market_hours = is_market_hours()
-
-		market_value = 5.05  # TODO Get with market API call
-		portfolio_exists = (self.portfolio is not None)
-
-		stock_exists = True  # TODO check if stock exists
-		cost = market_value * int(quantity)
-		buying_power = await self.portfolio.GetBuyingPower()
-
-		if quantity == 0:
+			return
+		elif not portfolio_exists:
 			await ctx.send(f"\
-				I'm sorry, but you can't buy 0 shares \
-				of a stock.\
+				I'm sorry, but your portfolio couldn't be found. Please make a portfolio before trading by executing the createPortfolio command.\
 			")
 			return
 
-		elif not portfolio_exists:
+		in_market_hours = is_market_hours()
+		market_value = 5.05  # TODO Get with market API call
+
+		stock_exists = True  # TODO check if stock exists
+		cost = market_value * int(quantity)
+		buying_power = self.portfolio.get_buying_power()
+
+		if quantity == 0:
 			await ctx.send(f"\
-				I'm sorry, but your portfolio couldn't be found. \
-				Please make a portfolio before trading by \
-				executing the createPortfolio command.\
+				I'm sorry, but you can't buy 0 shares of a stock.\
 			")
 			return
 
 		elif not in_market_hours:
 			await ctx.send(f"\
-				I'm sorry, but your order to sell {quantity} shares\
-				of {ticker} couldn't be completed. Available market\
-				hours are M-F 9:30AM until 4:00PM, EST.\
+				I'm sorry, but your order to purchase {quantity} shares of {ticker} couldn't be completed. Available market hours are M-F 9:30AM until 4:00PM, EST.\
 			")
 			return
 
@@ -155,86 +153,78 @@ class Investor(commands.Cog):
 
 		elif cost > buying_power:
 			await ctx.send(f"\
-				I'm sorry, but you don't have enough funds to \
-				purchase {quantity} shares of {ticker}, which would \
-				cost {cost}. Your available buying power is \
-				{buying_power}.\
+				I'm sorry, but you don't have enough funds to purchase {quantity} shares of {ticker}, which would cost {cost}. Your available buying power is {buying_power}.\
 			")
 			return
 
 		else:  # TODO prompt for confirmation
-			await self.portfolio.Bought(ticker, quantity)
+			self.portfolio.bought(ticker, quantity)
 			await ctx.send(f"\
-				Your order to purchase {quantity} shares of \
-				{ticker} executed successfully. You now own \
-				{self.portfolio.GetQuantity(ticker)} shares.\
+				Your order to purchase {quantity} shares of {ticker} executed successfully. You now own {self.portfolio.get_quantity(ticker)} shares.\
 			")
 			return
 
 	@commands.command()
 	async def sell(self, ctx, ticker=None, quantity=None):
-		avail_to_sell = self.portfolio.GetQuantity(ticker)
-		in_market_hours = is_market_hours()
 		portfolio_exists = (self.portfolio is not None)
 
 		if ticker is None or quantity is None:
 			await ctx.send(f"\
-				The buy command takes both a ticker symbol \
-				and a quantity. Please try again.\
+				The buy command takes both a ticker symbol and a quantity. Please try again.\
 			")
 			return
-
-		elif quantity == 0:
-			await ctx.send(f"\
-				I'm sorry, but you can't sell 0 shares \
-				of a stock.\
-			")
 
 		elif not portfolio_exists:
 			await ctx.send(f"\
-				I'm sorry, but your portfolio couldn't be found. \
-				Please make a portfolio before trading by \
-				executing the createPortfolio command.")
+				I'm sorry, but your portfolio couldn't be found. Please make a portfolio before trading by executing the createPortfolio command.")
 			return
+
+		avail_to_sell = self.portfolio.get_quantity(ticker)
+		in_market_hours = is_market_hours()
+
+		if quantity == 0:
+			await ctx.send(f"\
+				I'm sorry, but you can't sell 0 shares of a stock.\
+			")
 
 		elif not in_market_hours:
 			await ctx.send(f"\
-				I'm sorry, but your order to sell {quantity} shares\
-				of {ticker} couldn't be completed. Available market\
-				hours are M-F 9:30AM until 4:00PM, EST.\
+				I'm sorry, but your order to sell {quantity} shares of {ticker} couldn't be completed. Available market hours are M-F 9:30AM until 4:00PM, EST.\
 			")
 			return
 
 		elif avail_to_sell < quantity:
 			await ctx.send(f"\
-				I'm sorry, but your order to sell {quantity} shares of {ticker} \
-				couldn't be completed. Your portfolio only contains {avail_to_sell} shares of {ticker}.\
+				I'm sorry, but your order to sell {quantity} shares of {ticker} couldn't be completed. Your portfolio only contains {avail_to_sell} shares of {ticker}.\
 			")
 			return
 
 		else:  # TODO Ask for confirmation
 			avg_price = ...  # TODO avg sale price
-			await self.portfolio.Sold(ticker, quantity)
+			self.portfolio.sold(ticker, quantity)
 			await ctx.send(f"\
-				Your order to sell {quantity} shares of \
-				{ticker} was executed successfully, for an \
-				average price of {avg_price}.\
+				Your order to sell {quantity} shares of {ticker} was executed successfully, for an average price of {avg_price}.\
 			")
 			return
 
 	@commands.command()
 	async def view_portfolio(self, ctx):
-		blob = self.portfolio.Encode()
-		port_info = json.loads(blob)
-		buying_power = port_info["buying_power"]
-		port_value = port_info["portfolio_value"]
-		stocks = port_info["owned_stocks"]
+		if self.portfolio is None:
+			await ctx.send("Please create a portfolio before trying to view it")
+			return
+
+		buying_power = self.portfolio.get_buying_power()
+		port_value = self.portfolio.get_portfolio_value()
+		stocks = self.portfolio.get_owned()
 
 		output = f"Buying power: {buying_power}\n"
 		output += f"Portfolio Value: {port_value}\n"
 
-		for ticker in stocks:
-			output += f"{ticker}: {stocks[ticker]} shares"
+		if len(stocks) == 0:
+			output += "You do not own any stocks"
+		else:
+			for ticker in stocks:
+				output += f"{ticker}: {stocks[ticker]} shares"
 
 		await ctx.send(output)
 		return
@@ -242,7 +232,11 @@ class Investor(commands.Cog):
 	# TODO load an existing portfolio
 	@commands.command()
 	async def create_portfolio(self, ctx):
-		self.portfolio = Portfolio(self.client)
+		if self.portfolio is None:
+			self.portfolio = Portfolio()
+			await ctx.send("Investing portfolio successfully created. Your available funds (buying power) are $100,000.00")
+		else:
+			await ctx.send("At this time, investors can only have one portfolio. To view your portfolio, type /view_portfolio.")
 
 
 def setup(client):
