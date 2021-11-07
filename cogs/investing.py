@@ -31,7 +31,7 @@ class Portfolio:
 		if owned is None:
 			owned = {}
 		self.buying_power = int(bp)
-		self.portfolio_value = pv
+		self.portfolio_value = int(pv)
 		self.owned_stocks = owned
 		self.market = Market  # TODO Global market
 
@@ -64,14 +64,14 @@ class Portfolio:
 		return
 
 	def sold(self, ticker, quantity, market_value):
-		sold_for = int(quantity) * market_value
-		self.buying_power += int(sold_for)
-		self.owned_stocks[ticker] -= int(quantity)
+		sold_for = quantity * market_value
+		self.buying_power += sold_for
+		self.owned_stocks[ticker] -= quantity
 
 	def get_owned(self):
 		return self.owned_stocks
 
-	def custom_encode(self):
+	def serialize(self):
 		encoded = {
 			"buying_power": self.buying_power,
 			"portfolio_value": self.portfolio_value,
@@ -102,7 +102,7 @@ class Investor(commands.Cog):
 		self.portfolio = None
 
 	# TODO: Store encoded data [instead of?] returning
-	def encode(self):
+	def serialize(self):
 		#portfolio_json = self.portfolio.encode()
 		#temp_dict = {self.id: portfolio_json}
 		#return json.dumps(temp_dict)
@@ -125,11 +125,12 @@ class Investor(commands.Cog):
 			")
 			return
 
+		quantity = int(quantity)
 		in_market_hours = is_market_hours()
 		market_value = random.randint(1, 1250)  # TODO Get with market API call
 
 		stock_exists = True  # TODO check if stock exists
-		cost = market_value * int(quantity)
+		cost = market_value * quantity
 		buying_power = self.portfolio.get_buying_power()
 
 		if quantity == 0:
@@ -145,7 +146,7 @@ class Investor(commands.Cog):
 			await ctx.send(f"\
 				Available market hours are M-F 9:30AM - 4:00PM EST. For UBHacking, this restriction has been temporarily lifted.\
 			")
-			self.portfolio.bought(ticker, int(quantity), market_value)
+			self.portfolio.bought(ticker, quantity, market_value)
 			await ctx.send(f"\
 				Your order to purchase {quantity} shares of {ticker} executed successfully at an average price of {market_value}, for a total cost of {cost}. You now own {self.portfolio.get_quantity(ticker)} shares.\
 			")
