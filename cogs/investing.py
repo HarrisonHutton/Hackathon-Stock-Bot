@@ -72,11 +72,12 @@ class Portfolio:
 		value = 0
 		for ticker in self.owned_stocks:
 			quantity = self.owned_stocks[ticker]
-			market_value = random.randint(1, 1250)  # TODO Get market value
+			market_value = self.market.ticker_price(ticker)
 			value += (quantity * market_value)
 		return value + self.buying_power
 
-	def bought(self, ticker, quantity, market_value):
+	def bought(self, ticker, quantity):
+		market_value = self.market.ticker_price(ticker)
 		total_cost = quantity * market_value
 
 		# Buy using buying power then increment amount owned
@@ -88,13 +89,19 @@ class Portfolio:
 
 		return
 
-	def sold(self, ticker, quantity, market_value):
+	def sold(self, ticker, quantity):
+		market_value = self.market.ticker_price(ticker)
 		sold_for = quantity * market_value
 		self.buying_power += sold_for
 		self.owned_stocks[ticker] -= quantity
+		return market_value
 
 	def get_owned(self):
 		return self.owned_stocks
+
+	def total_cost(self, ticker, quantity):
+		market_value = self.market.ticker_price(ticker)
+		return market_value * quantity
 
 	def serialize(self):
 		encoded = {
@@ -168,11 +175,11 @@ class Investor(commands.Cog):
 
 		quantity = int(quantity)
 		in_market_hours = is_market_hours()
-		market_value = random.randint(1, 1250)  # TODO Get with market API call
 
 		stock_exists = True  # TODO check if stock exists
-		cost = market_value * quantity
+		cost = self.portfolio.total_cost(ticker, quantity)
 		buying_power = self.portfolio.get_buying_power()
+		message = ctx.channel.last_message
 
 		if quantity == 0:
 			await ctx.send(f"\
@@ -187,11 +194,10 @@ class Investor(commands.Cog):
 			await ctx.send(f"\
 				Available market hours are M-F 9:30AM - 4:00PM EST. For UBHacking, this restriction has been temporarily lifted.\
 			")
-			self.portfolio.bought(ticker, quantity, market_value)
+			self.portfolio.bought(ticker, quantity)
 			await ctx.send(f"\
 				Your order to purchase {quantity} shares of {ticker} executed successfully at an average price of {market_value}, for a total cost of {cost}. You now own {self.portfolio.get_quantity(ticker)} shares.\
 			")
-			message = ctx.channel.last_message
 			self.currently_investing[str(message)] = str(ctx.author.id)
 			await message.add_reaction('✅')
 			await message.add_reaction('❌')
@@ -260,19 +266,18 @@ class Investor(commands.Cog):
 			await ctx.send(f"\
 				Available market hours are M-F 9:30AM - 4:00PM EST. For UBHacking, this restriction has been temporarily lifted.\
 			")
-			avg_price = random.randint(1, 1250)
+			avg_price = self.portfolio.sold(ticker, quantity, avg_price)
 			total = quantity * avg_price
-			self.portfolio.sold(ticker, quantity, avg_price)
 			await ctx.send(f"\
 				Your order to sell {quantity} shares of {ticker} was executed successfully, for an average price of ${avg_price}.00/share. The total sold value is ${total}.00\
 			")
 			return
 
 		else:  # TODO Ask for confirmation
-			avg_price = random.randint(1, 1250)  # TODO avg sale price
-			self.portfolio.sold(ticker, quantity)
+			avg_price = self.portfolio.sold(ticker, quantity)
+			total = avg_price * quantity
 			await ctx.send(f"\
-				Your order to sell {quantity} shares of {ticker} was executed successfully, for an average price of {avg_price}.\
+				Your order to sell {quantity} shares of {ticker} was executed successfully, for an average price of {avg_price}.00/share. The total sold value is ${total}.00\
 			")
 			return
 
